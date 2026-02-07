@@ -1,0 +1,19 @@
+# Changelog
+
+All notable changes to bautolist.nvim will be documented in this file.
+
+The format is based on [Keep a Changelog](https://keepachangelog.com/),
+and this project adheres to [Semantic Versioning](https://semver.org/).
+
+## [Unreleased]
+
+### Added
+
+- Test suite using busted + nlua (spec/numbers_spec.lua, spec/utils_spec.lua, spec/config_spec.lua)
+- CI via GitHub Actions (nvim-neorocks/nvim-busted-action) running against stable and nightly Neovim
+- Rockspec for luarocks-based test dependency management
+- Makefile for local test execution
+
+### Fixed
+
+- Identified pre-existing bug: `arabic2roman(1999)` returns `"MIM"` instead of `"MCMXCIX"`
