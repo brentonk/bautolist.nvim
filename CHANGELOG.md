@@ -7,12 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [v4.0.0] - 2026-02-07
+
 ### Added
 
 - Test suite using busted + nlua (spec/numbers_spec.lua, spec/utils_spec.lua, spec/config_spec.lua)
 - CI via GitHub Actions (nvim-neorocks/nvim-busted-action) running against stable and nightly Neovim
 - Rockspec for luarocks-based test dependency management
 - Makefile for local test execution
+- Integration tests for `recalculate()` covering child list reset, multi-level nesting, alphabetic lists, and unordered lists (spec/recalculate_spec.lua)
 
 ### Changed
 
@@ -23,4 +26,5 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ### Fixed
 
+- `recalculate()` now resets indented ordered child lists to 1 (gaoDean/autolist.nvim#82)
 - Identified pre-existing bug: `arabic2roman(1999)` returns `"MIM"` instead of `"MCMXCIX"`
