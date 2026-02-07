@@ -1,34 +1,23 @@
 <p align="center">
-  <h1 align="center">autolist.nvim</h2>
+  <h1 align="center">bautolist.nvim</h2>
 </p>
 <p align="center">
   Automatic list continuation and formatting for neovim, powered by lua
 </p>
 <p align="center">
-  <a href="https://github.com/gaoDean/autolist.nvim/stargazers">
-    <img alt="Stars" src="https://img.shields.io/github/stars/gaoDean/autolist.nvim?style=for-the-badge&logo=starship&color=C9CBFF&logoColor=D9E0EE&labelColor=302D41"></a>
-  <a href="https://github.com/gaoDean/autolist.nvim/issues">
-    <img alt="Issues" src="https://img.shields.io/github/issues/gaoDean/autolist.nvim?style=for-the-badge&logo=bilibili&color=F5E0DC&logoColor=D9E0EE&labelColor=302D41"></a>
-  <a href="https://github.com/gaoDean/autolist.nvim">
-    <img alt="Code Size" src="https://img.shields.io/github/languages/code-size/gaoDean/autolist.nvim?color=%23DDB6F2&logo=hackthebox&style=for-the-badge&logoColor=D9E0EE&labelColor=302D41"/></a>
+  <a href="https://github.com/brentonk/bautolist.nvim/actions/workflows/tests.yml">
+    <img alt="Tests" src="https://img.shields.io/github/actions/workflow/status/brentonk/bautolist.nvim/tests.yml?style=for-the-badge&logo=github&label=tests&color=C9CBFF&logoColor=D9E0EE&labelColor=302D41"></a>
+  <a href="https://github.com/brentonk/bautolist.nvim/issues">
+    <img alt="Issues" src="https://img.shields.io/github/issues/brentonk/bautolist.nvim?style=for-the-badge&logo=bilibili&color=F5E0DC&logoColor=D9E0EE&labelColor=302D41"></a>
+  <a href="https://github.com/brentonk/bautolist.nvim">
+    <img alt="Code Size" src="https://img.shields.io/github/languages/code-size/brentonk/bautolist.nvim?color=%23DDB6F2&logo=hackthebox&style=for-the-badge&logoColor=D9E0EE&labelColor=302D41"/></a>
 </p>
 
-⚠️ If you've just updated the plugin, read over this document to see
-what's new. ⚠️
+A maintained fork of [gaoDean/autolist.nvim](https://github.com/gaoDean/autolist.nvim).
 
-<https://user-images.githubusercontent.com/97860672/193787598-56abba13-3710-43d1-b8b3-4fd81074dbd4.mp4>
+# Why bautolist.nvim
 
-# Why autolist.nvim
-
-This question can be interpreted in two ways. Why did I create autolist, and why you should use autolist.
-
-### Why did I create autolist?
-
-It sounds simple, but all I wanted was a list continuation plugin in lua. Bullets.vim works, but it is written in vimscript and is more than a thousand lines long. Needless to say, I couldn't find a suitable one, so I decided to create my own.
-
-### Why use autolist?
-
-`autolist.nvim's` files are relatively small, with the files complete with comments and formatting. It strives to be as minimal as possible, while implementing basic functionality of automatic lists, and implements context aware renumbering/marking of list entries, to take your mind off the formatting, and have it work in the background while you write down your thoughts.
+bautolist.nvim is a minimal, lua-powered plugin for automatic list continuation and formatting. It implements context-aware renumbering/marking of list entries, so you can focus on writing while it handles the formatting in the background.
 
 # Features
 
@@ -45,7 +34,7 @@ This is using lazy.nvim, but you can adapt it to other package managers as well:
 
 ``` lua
 {
-    "gaoDean/autolist.nvim",
+    "brentonk/bautolist.nvim",
     ft = {
         "markdown",
         "text",
@@ -236,12 +225,8 @@ Does it support checkbox lists? Yes.
 
 ## Troubleshooting
 
-Found that a plugin breaks when you use autolist? See [#43](https://github.com/gaoDean/autolist.nvim/issues/43). Basically you need to make sure that autolist loads **after** all the other plugins. If that doesn't work, feel free to create a new issue. Also, make sure that the capitalization of your mappings is correct, or autolist won't detect the other plugins (`<cr>` should be `<CR>`).
+Found that a plugin breaks when you use bautolist? See [gaoDean/autolist.nvim#43](https://github.com/gaoDean/autolist.nvim/issues/43). Basically you need to make sure that bautolist loads **after** all the other plugins. If that doesn't work, feel free to create a new issue. Also, make sure that the capitalization of your mappings is correct, or bautolist won't detect the other plugins (`<cr>` should be `<CR>`).
 
 ## Credit
 
-inspired by [this gist](https://gist.github.com/sedm0784/dffda43bcfb4728f8e90)
-
-> "All software adds features until it is annoyingly complicated. It is then replaced by a"simpler" solution which adds features until it is exactly as complicated."
-
-looking for contributors because i have schoolwork which means i sometimes cant keep up with issues
+Originally created by [gaoDean](https://github.com/gaoDean/autolist.nvim), inspired by [this gist](https://gist.github.com/sedm0784/dffda43bcfb4728f8e90).

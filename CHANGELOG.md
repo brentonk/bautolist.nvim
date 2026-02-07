@@ -14,6 +14,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 - Rockspec for luarocks-based test dependency management
 - Makefile for local test execution
 
+### Changed
+
+- Forked from gaoDean/autolist.nvim and renamed to brentonk/bautolist.nvim
+- Updated README with new repo name, badges, and attribution
+- Replaced deprecated `nvim_buf_get_option` calls with `vim.bo` in treesitter module
+- Removed stray `print()` debug statement from list cycling function
+
 ### Fixed
 
 - Identified pre-existing bug: `arabic2roman(1999)` returns `"MIM"` instead of `"MCMXCIX"`
