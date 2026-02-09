@@ -72,6 +72,18 @@ Tests use **busted** (Lua test framework) run through **nlua** (Neovim-as-Lua-in
 - **Unit tests** (`spec/utils_spec.lua`, `spec/numbers_spec.lua`, `spec/config_spec.lua`): test pure functions directly.
 - **Integration tests** (`spec/recalculate_spec.lua`): create real Neovim buffers via `vim.api.nvim_create_buf`, set filetype/options, populate lines, position cursor, call `auto.recalculate()`, then assert on buffer contents. Must set `expandtab = true` and a specific `tabstop` before `config.update()` so `config.tabstop` matches the indent strings used in test data.
 
+## Branching Workflow
+
+- **`main`** — stable/release branch. Only receives merges from `develop` when ready to release.
+- **`develop`** — integration branch for new features and fixes. Push new work here.
+
+Workflow:
+1. Create feature commits on `develop` (or on a feature branch merged into `develop`).
+2. Push `develop` so it can be tested (user points their plugin manager at the `develop` branch).
+3. When satisfied, merge `develop` into `main` and tag a new release.
+
+When making changes, always branch from and push to `develop` unless explicitly told otherwise. Never push untested work directly to `main`.
+
 ## Known Issues
 
 - `numbers.arabic2roman(1999)` returns `"MIM"` instead of `"MCMXCIX"` (subtractive notation bug).
