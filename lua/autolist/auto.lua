@@ -187,13 +187,26 @@ function M.new_bullet(prev_line_override)
     local farther_num = prev_line_num - 1
     if farther_num >= 1 then
       local farther_line = fn.getline(farther_num)
-      for _, pat in ipairs(filetype_lists) do
-        local b = get_bullet_from(farther_line, pat)
-        if b then
-          -- check it's not an empty bullet
-          if string.len(farther_line) > string.len(b) then
-            bullet = b
-            break
+      -- Only use this fallback when the list above is actually
+      -- loose-formatted (blank line between two list items).  A tight
+      -- list followed by a single blank is a terminated list.
+      local is_actually_loose = false
+      if farther_num >= 3 then
+        local above = fn.getline(farther_num - 1)
+        if utils.is_blank_line(above)
+          and utils.is_list(fn.getline(farther_num - 2), filetype_lists) then
+          is_actually_loose = true
+        end
+      end
+      if is_actually_loose then
+        for _, pat in ipairs(filetype_lists) do
+          local b = get_bullet_from(farther_line, pat)
+          if b then
+            -- check it's not an empty bullet
+            if string.len(farther_line) > string.len(b) then
+              bullet = b
+              break
+            end
           end
         end
       end

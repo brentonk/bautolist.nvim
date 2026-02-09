@@ -11,6 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 - Empty ordered list bullets (e.g., `3.`) are now correctly detected and deleted on Enter even when Neovim strips the trailing space from the marker
 - Deleting an empty bullet now removes the line entirely instead of clearing it to an empty string, preventing a stale blank line
+- With `loose_lists` enabled, pressing Enter on a blank line after a terminated tight list no longer creates a spurious new bullet
 
 ## [v4.2.0] - 2026-02-09
 
