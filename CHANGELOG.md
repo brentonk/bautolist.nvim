@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+### Fixed
+
+- Empty ordered list bullets (e.g., `3.`) are now correctly detected and deleted on Enter even when Neovim strips the trailing space from the marker
+- Deleting an empty bullet now removes the line entirely instead of clearing it to an empty string, preventing a stale blank line
+
 ## [v4.2.0] - 2026-02-09
 
 ### Added
