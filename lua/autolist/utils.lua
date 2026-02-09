@@ -81,8 +81,8 @@ function M.set_line_marker(linenum, marker, list_types)
 	local line = fn.getline(linenum)
 	line = line:gsub("%s*$", "", 1)
 	line = line:gsub(
-		"^(%s*)" .. M.get_marker_pat(line, list_types) .. "(%s*)",
-		"%1" .. (marker or "") .. "%2",
+		"^(%s*)" .. M.get_marker_pat(line, list_types) .. "%s*",
+		"%1" .. (marker or "") .. " ",
 		1
 	)
 	fn.setline(linenum, line)

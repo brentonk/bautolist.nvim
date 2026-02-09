@@ -94,6 +94,16 @@ describe("recalculate", function()
     assert.are.equal(INDENT .. "b) child two", result[3])
   end)
 
+  it("preserves space after marker on empty bullets", function()
+    local result = recalc_buf({
+      "1. first",
+      "1. ",
+    }, 1)
+
+    assert.are.equal("1. first", result[1])
+    assert.are.equal("2. ",      result[2])
+  end)
+
   it("does not alter unordered child lists", function()
     local result = recalc_buf({
       "1. parent",
