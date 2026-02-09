@@ -32,6 +32,10 @@ describe("config", function()
       assert.are.equal("x", config.checkbox.fill)
     end)
 
+    it("has loose_lists disabled by default", function()
+      assert.is_false(config.loose_lists)
+    end)
+
     it("sets list_cap", function()
       assert.are.equal(50, config.list_cap)
     end)
@@ -55,6 +59,11 @@ describe("config", function()
       config.update({ enabled = false })
       -- cycle should not have been updated (update returns early)
       assert.are.equal(old_cycle, config.cycle)
+    end)
+
+    it("can enable loose_lists", function()
+      config.update({ loose_lists = true })
+      assert.is_true(config.loose_lists)
     end)
 
     it("adds custom filetypes to lists", function()

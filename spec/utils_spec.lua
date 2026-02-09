@@ -10,6 +10,28 @@ require("autolist.config").update()
 local list_types = { "[-+*]", "%d+[.)]", "%a[.)]", "%u*[.)]" }
 
 describe("utils", function()
+  describe("is_blank_line", function()
+    it("returns true for empty string", function()
+      assert.is_true(utils.is_blank_line(""))
+    end)
+
+    it("returns true for spaces only", function()
+      assert.is_true(utils.is_blank_line("   "))
+    end)
+
+    it("returns true for tab only", function()
+      assert.is_true(utils.is_blank_line("\t"))
+    end)
+
+    it("returns false for list item", function()
+      assert.is_false(utils.is_blank_line("- item"))
+    end)
+
+    it("returns false for indented list item", function()
+      assert.is_false(utils.is_blank_line("  1. item"))
+    end)
+  end)
+
   describe("get_indent_lvl", function()
     it("returns 0 for no indent", function()
       assert.are.equal(0, utils.get_indent_lvl("- item"))
