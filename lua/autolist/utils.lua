@@ -282,4 +282,52 @@ function M.is_ordered(entry, rise)
 	return nil
 end
 
+-- ====================== content_indent helpers =========================== --
+
+-- Returns the width of the marker plus trailing space (e.g. "1. " → 3, "- " → 2).
+-- Returns nil for non-list lines.
+function M.get_content_width(line, list_types)
+	local is, _, marker = M.is_list(line, list_types)
+	if not is then return nil end
+	-- marker is the matched text (e.g. "-", "1.", "10.", "III.")
+	-- content starts after marker + one space
+	return #marker + 1
+end
+
+-- Walk upward to find nearest list item with strictly less indentation.
+-- Returns (linenum, line) or nil.
+function M.find_parent_line(linenum, list_types)
+	local cur_indent = M.get_indent_lvl(fn.getline(linenum))
+	local ln = linenum - 1
+	while ln >= 1 do
+		local line = fn.getline(ln)
+		if M.is_blank_line(line) then
+			ln = ln - 1
+		elseif M.is_list(line, list_types) and M.get_indent_lvl(line) < cur_indent then
+			return ln, line
+		else
+			return nil
+		end
+	end
+	return nil
+end
+
+-- Walk upward to find nearest list item at same or lesser indent.
+-- This is the line whose content width determines how far to indent on Tab.
+function M.find_indent_parent_for_tab(linenum, list_types)
+	local cur_indent = M.get_indent_lvl(fn.getline(linenum))
+	local ln = linenum - 1
+	while ln >= 1 do
+		local line = fn.getline(ln)
+		if M.is_blank_line(line) then
+			ln = ln - 1
+		elseif M.is_list(line, list_types) and M.get_indent_lvl(line) <= cur_indent then
+			return ln, line
+		else
+			return nil
+		end
+	end
+	return nil
+end
+
 return M

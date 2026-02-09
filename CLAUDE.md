@@ -87,6 +87,7 @@ When making changes, always branch from and push to `develop` unless explicitly 
 Before committing, ensure **CHANGELOG.md** and **README.md** are up to date:
 - Add new entries under `## [Unreleased]` in CHANGELOG.md for any added, changed, or fixed items.
 - If a commit adds or changes a user-facing config option, update the config block in README.md to match.
+- If a commit changes behavior relative to upstream autolist.nvim (new feature, bug fix, default change), update the **"Differences from autolist.nvim"** section in README.md.
 
 ## Known Issues
 

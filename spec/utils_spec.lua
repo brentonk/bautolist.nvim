@@ -186,6 +186,44 @@ describe("utils", function()
     end)
   end)
 
+  describe("get_content_width", function()
+    it("returns 2 for '- '", function()
+      assert.are.equal(2, utils.get_content_width("- item", list_types))
+    end)
+
+    it("returns 2 for '* '", function()
+      assert.are.equal(2, utils.get_content_width("* item", list_types))
+    end)
+
+    it("returns 3 for '1. '", function()
+      assert.are.equal(3, utils.get_content_width("1. item", list_types))
+    end)
+
+    it("returns 4 for '10. '", function()
+      assert.are.equal(4, utils.get_content_width("10. item", list_types))
+    end)
+
+    it("returns 3 for 'a) '", function()
+      assert.are.equal(3, utils.get_content_width("a) item", list_types))
+    end)
+
+    it("returns 3 for 'I. '", function()
+      assert.are.equal(3, utils.get_content_width("I. item", list_types))
+    end)
+
+    it("returns 5 for 'III. '", function()
+      assert.are.equal(5, utils.get_content_width("III. item", list_types))
+    end)
+
+    it("returns nil for non-list lines", function()
+      assert.is_nil(utils.get_content_width("just text", list_types))
+    end)
+
+    it("handles indented lines", function()
+      assert.are.equal(3, utils.get_content_width("   1. item", list_types))
+    end)
+  end)
+
   describe("is_ordered", function()
     it("returns truthy for ordered lists", function()
       assert.is_truthy(utils.is_ordered("1. item"))

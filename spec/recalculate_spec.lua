@@ -14,7 +14,7 @@ local function recalc_buf(lines, cursor_line)
   vim.bo.filetype = "markdown"
   vim.opt.expandtab = true
   vim.opt.tabstop = 4
-  config.update()
+  config.update({ content_indent = false })
 
   vim.api.nvim_buf_set_lines(buf, 0, -1, false, lines)
   vim.api.nvim_win_set_cursor(0, { cursor_line or 1, 0 })
@@ -126,7 +126,7 @@ local function recalc_buf_loose(lines, cursor_line)
   vim.bo.filetype = "markdown"
   vim.opt.expandtab = true
   vim.opt.tabstop = 4
-  config.update({ loose_lists = true })
+  config.update({ loose_lists = true, content_indent = false })
 
   vim.api.nvim_buf_set_lines(buf, 0, -1, false, lines)
   vim.api.nvim_win_set_cursor(0, { cursor_line or 1, 0 })
