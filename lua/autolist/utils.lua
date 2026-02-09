@@ -5,6 +5,7 @@ local suffix = ").*$"
 local fn = vim.fn
 
 local number_utils = require("autolist.numbers")
+local config = require("autolist.config")
 
 local M = {}
 
@@ -24,6 +25,10 @@ end
 -- declare the local function before the current function.
 
 -- ================================ utilities ============================== --
+
+function M.is_blank_line(line)
+	return line:find('^%s*$') ~= nil
+end
 
 local function char_add(char, amount)
 	return string.char(charwrap(char:byte() + amount))
@@ -171,17 +176,29 @@ function M.get_list_start(cur_linenum, list_types)
 	if not cur_linenum then cur_linenum = fn.line(".") end
 	local linenum = cur_linenum
 	local line = fn.getline(linenum)
-    if M.is_list(line, list_types) then
-        while
-            M.is_list(line, list_types)
-        do
-            linenum = linenum - 1
-            line = fn.getline(linenum)
-        end
-    else
-        return linenum
-    end
-    return linenum + 1
+	-- if cursor is on a blank line in loose mode, look down to find a list item
+	if config.loose_lists and M.is_blank_line(line) then
+		return linenum
+	end
+	if M.is_list(line, list_types) then
+		while M.is_list(line, list_types) do
+			linenum = linenum - 1
+			line = fn.getline(linenum)
+			-- in loose mode, skip a single blank line if the line above it is a list item
+			if config.loose_lists and M.is_blank_line(line) and linenum >= 1 then
+				local peek = fn.getline(linenum - 1)
+				if M.is_list(peek, list_types) then
+					linenum = linenum - 1
+					line = peek
+				else
+					break
+				end
+			end
+		end
+	else
+		return linenum
+	end
+	return linenum + 1
 end
 
 -- get the start of the current list scope (indent)
@@ -198,6 +215,15 @@ function M.get_indent_list_start(cur_linenum, list_types)
 		do
 			linenum = linenum - 1
 			line = fn.getline(linenum)
+			if config.loose_lists and M.is_blank_line(line) and linenum >= 1 then
+				local peek = fn.getline(linenum - 1)
+				if M.is_list(peek, list_types) and M.get_indent_lvl(peek) >= cur_indent then
+					linenum = linenum - 1
+					line = peek
+				else
+					break
+				end
+			end
 		end
 	else
 		while
@@ -206,6 +232,16 @@ function M.get_indent_list_start(cur_linenum, list_types)
 		do
 			linenum = linenum - 1
 			line = fn.getline(linenum)
+			if config.loose_lists and M.is_blank_line(line) and linenum >= 1 then
+				local peek = fn.getline(linenum - 1)
+				if (M.is_ordered(peek) and M.get_indent_lvl(peek) >= cur_indent)
+					or M.get_indent_lvl(peek) > cur_indent then
+					linenum = linenum - 1
+					line = peek
+				else
+					break
+				end
+			end
 		end
 	end
 	line = fn.getline(linenum + 1)

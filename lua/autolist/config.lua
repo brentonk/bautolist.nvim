@@ -59,6 +59,7 @@ local default_config = {
     right = "%]", -- the right checkbox delim (same customisation as above)
     fill = "x", -- if you do the above two customisations, your checkbox could be (x) instead of [x]
   },
+  loose_lists = false, -- experimental: treat single blank lines between items as part of a list
 
   -- this is all based on lua patterns, see "Defining custom lists" for a nice article to learn them
 }

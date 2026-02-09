@@ -67,10 +67,29 @@ function M.recalculate(override_start_num)
   local line_indent = utils.get_indent_lvl(line)
   local prev_indent = -1
 
-  while
-    line_indent >= list_indent
-    and linenum < list_start_num + config.list_cap
-    do
+  while linenum < list_start_num + config.list_cap do
+    local is_blank = config.loose_lists and utils.is_blank_line(line)
+
+    -- blank line handling for loose lists
+    if is_blank then
+      local next_line = fn.getline(linenum + 1)
+      if utils.is_list(next_line, types)
+        and utils.get_indent_lvl(next_line) >= list_indent then
+        -- skip this blank line, continue to next
+        linenum = linenum + 1
+        line = fn.getline(linenum)
+        line_indent = utils.get_indent_lvl(line)
+        -- fall through to process this line normally below
+      else
+        return
+      end
+    end
+
+    -- indent check (not applied to blank lines, which were already handled)
+    if not is_blank and line_indent < list_indent then
+      return
+    end
+
     if utils.is_list(line, types) then
       if line_indent == list_indent then
         local val = utils.set_ordered_value(list_start, target)
@@ -149,11 +168,32 @@ function M.new_bullet(prev_line_override)
   if is_in_code_fence() then return nil end
 
   -- if new_bullet_before, prev_line should be the line below
-  local prev_line = fn.getline(fn.line(".") + (prev_line_override and 1 or -1))
+  local prev_line_num = fn.line(".") + (prev_line_override and 1 or -1)
+  local prev_line = fn.getline(prev_line_num)
   local cur_line = fn.getline(".")
   local bullet = find_suitable_bullet(prev_line,
     filetype_lists,
     not prev_line_override)
+
+  -- in loose mode, if prev_line is blank, look one more line back
+  if not bullet and config.loose_lists and utils.is_blank_line(prev_line)
+    and not prev_line_override then
+    local farther_num = prev_line_num - 1
+    if farther_num >= 1 then
+      local farther_line = fn.getline(farther_num)
+      for _, pat in ipairs(filetype_lists) do
+        local b = get_bullet_from(farther_line, pat)
+        if b then
+          -- check it's not an empty bullet
+          if string.len(farther_line) > string.len(b) then
+            bullet = b
+            break
+          end
+        end
+      end
+    end
+  end
+
   bullet = bullet and utils.get_ordered_add(bullet, 1) -- add 1 if ordered list
 
   if prev_line:match(pat_colon)
@@ -163,6 +203,29 @@ function M.new_bullet(prev_line_override)
   end
 
   if bullet then -- insert bullet
+    -- in loose mode, detect if the list uses loose spacing and insert a blank line
+    if config.loose_lists and not prev_line_override then
+      local check_num = prev_line_num
+      -- if we already looked past a blank line, the list is loose
+      local is_loose = utils.is_blank_line(fn.getline(prev_line_num))
+      if not is_loose and check_num >= 2 then
+        -- check if the line above prev_line is blank (indicating loose list)
+        local above = fn.getline(check_num - 1)
+        if utils.is_blank_line(above) and check_num >= 3 then
+          local above_above = fn.getline(check_num - 2)
+          if utils.is_list(above_above, filetype_lists) then
+            is_loose = true
+          end
+        end
+      end
+      if is_loose then
+        local cur_linenum = fn.line(".")
+        -- insert a blank line above the current line
+        vim.api.nvim_buf_set_lines(0, cur_linenum - 1, cur_linenum - 1, false, { "" })
+        -- cursor moves down by one due to the insertion
+        vim.api.nvim_win_set_cursor(0, { cur_linenum + 1, 0 })
+      end
+    end
     utils.set_current_line(bullet .. cur_line:gsub("^%s*", "", 1))
   end
 end
