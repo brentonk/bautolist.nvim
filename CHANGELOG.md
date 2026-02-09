@@ -7,6 +7,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [v4.1.0] - 2026-02-09
+
+### Added
+
+- Experimental `loose_lists` option (opt-in, default `false`): when enabled, single blank lines between list items are treated as part of the same list (CommonMark "loose lists"). Two consecutive blank lines still terminate a list.
+- `is_blank_line()` utility helper in utils.lua
+- Tests for loose list recalculation, backward walk, double-blank termination, and nested children (75 total tests)
+
+### Fixed
+
+- `set_line_marker()` now always preserves a space after the marker, fixing cursor placement after shift-tab on empty bullets (cursor was landing on the dot instead of after the space)
+
 ## [v4.0.0] - 2026-02-07
 
 ### Added
