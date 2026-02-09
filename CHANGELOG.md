@@ -12,6 +12,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 - `content_indent` option (default `true`): child list indentation aligns to the parent's content column (marker width + 1 space) instead of using `tabstop`/`shiftwidth`. For example, `1. Hello` → 3-space indent for children, matching CommonMark spec for correct rendering in Quarto and other strict markdown processors. Set to `false` to restore the upstream autolist.nvim behavior of using `tabstop`.
 - `get_content_width()`, `find_parent_line()`, and `find_indent_parent_for_tab()` utility helpers in utils.lua
 
+### Fixed
+
+- Quarto fragment separator (`. . .`) no longer triggers a roman numeral list (roman pattern required zero-or-more uppercase letters; now requires one-or-more)
+- Bold/italic markup (`**text**`, `*text*`) no longer triggers an unordered `*` list (`is_list()` and `get_bullet_from()` now require whitespace after the marker)
+
 ## [v4.1.0] - 2026-02-09
 
 ### Added

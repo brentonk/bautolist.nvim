@@ -57,7 +57,7 @@ local function exec_ordered(
 )
 	local digit = entry:gsub("^%s*(%d+)[.)].*$", "%1", 1)
 	local char = entry:gsub("^%s*(%l)[.)].*$", "%1", 1)
-	local roman = entry:gsub("^%s*(%u*)[.)].*$", "%1", 1)
+	local roman = entry:gsub("^%s*(%u+)[.)].*$", "%1", 1)
 	if digit and digit ~= entry then
 		return func_digit(digit)
 	elseif char and char ~= entry then
@@ -263,7 +263,18 @@ function M.is_list(entry, list_types, more)
 	for _, pat in ipairs(list_types) do
 		local sub, nsubs = entry:gsub(prefix .. pat .. more .. suffix, "%1", 1)
 		-- if replaced something
-		if nsubs > 0 then return true, pat, sub end
+		if nsubs > 0 then
+			-- Verify marker is followed by whitespace or end of line.
+			-- Prevents e.g. **bold** matching as unordered list.
+			if more ~= "" then
+				return true, pat, sub
+			end
+			local indent_len = #(entry:match("^(%s*)"))
+			local after_pos = indent_len + #sub + 1
+			if after_pos > #entry or entry:sub(after_pos, after_pos):match("%s") then
+				return true, pat, sub
+			end
+		end
 	end
 	return false
 end

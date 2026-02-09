@@ -225,6 +225,7 @@ bautolist.nvim is a maintained fork of [gaoDean/autolist.nvim](https://github.co
 -   **Content-aligned indentation** (`content_indent`, default `true`): Tab/Shift-Tab and `recalculate()` indent child lists to the parent's content column (e.g. 3 spaces for `1. `, 2 spaces for `- `) instead of always using `tabstop`/`shiftwidth`. This produces CommonMark-compliant nesting that renders correctly in Quarto and other strict markdown processors. Set `content_indent = false` to restore the upstream behavior.
 -   **Loose list support** (`loose_lists`, default `false`): When enabled, single blank lines between list items are treated as part of the same list (CommonMark "loose lists"). Two consecutive blank lines terminate a list. Upstream has no loose list handling.
 -   **Cursor fix on empty bullets**: `set_line_marker()` always preserves a space after the marker, fixing cursor placement after Shift-Tab on empty bullets (cursor was landing on the dot instead of after the space).
+-   **Stricter list marker detection**: List markers must be followed by whitespace (or be at end-of-line). Prevents Quarto fragment separators (`. . .`) from triggering roman numeral lists and bold/italic markup (`**text**`) from triggering unordered lists.
 
 # Other
 
