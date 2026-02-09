@@ -7,7 +7,7 @@ local list_patterns = {
     unordered = "[-+*]", -- - + *
     digit = "%d+[.)]", -- 1. 2. 3.
     ascii = "%a[.)]", -- a) b) c)
-    roman = "%u*[.)]", -- I. II. III.
+    roman = "%u+[.)]", -- I. II. III.
     latex_item = "\\item",
 }
 
@@ -60,6 +60,7 @@ local default_config = {
     fill = "x", -- if you do the above two customisations, your checkbox could be (x) instead of [x]
   },
   loose_lists = false, -- experimental: treat single blank lines between items as part of a list
+  content_indent = true, -- align child lists to parent content (e.g. 3 spaces for "1. ")
 
   -- this is all based on lua patterns, see "Defining custom lists" for a nice article to learn them
 }

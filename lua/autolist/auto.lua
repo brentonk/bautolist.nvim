@@ -102,7 +102,9 @@ function M.recalculate(override_start_num)
         prev_indent = -1 -- escaped the child list
       elseif
         line_indent ~= prev_indent -- small difference between var names
-        and line_indent == list_indent + config.tabstop
+        and line_indent == list_indent + (config.content_indent
+          and (utils.get_content_width(list_start, types) or config.tabstop)
+          or config.tabstop)
       then
         -- this part recalculates a child list with recursion
         -- the prev_indent prevents it from recalculating multiple times.
@@ -127,10 +129,10 @@ end
 local function get_bullet_from(line, pattern)
   local matched_bare = line:match("^%s*"
     .. pattern
-    .. "%s*") -- only bullet, no checkbox
+    .. "%s+") -- only bullet, require space after marker
   local matched_with_checkbox = line:match("^%s*"
     .. pattern
-    .. "%s*"
+    .. "%s+"
     .. "%[.%]"
     .. "%s*") -- bullet and checkbox
 
@@ -199,7 +201,14 @@ function M.new_bullet(prev_line_override)
   if prev_line:match(pat_colon)
     and (config.colon.indent_raw
     or (bullet and config.colon.indent)) then
-    bullet = config.tab .. prev_line:match("^%s*") .. config.colon.preferred .. " "
+    local indent_str
+    if config.content_indent then
+      local cw = utils.get_content_width(prev_line, filetype_lists)
+      indent_str = string.rep(" ", (cw or config.tabstop) + utils.get_indent_lvl(prev_line))
+    else
+      indent_str = config.tab .. prev_line:match("^%s*")
+    end
+    bullet = indent_str .. config.colon.preferred .. " "
   end
 
   if bullet then -- insert bullet
@@ -241,12 +250,41 @@ local function handle_indent(before, after)
   local filetype_lists = get_lists()
   local current_line_is_list = utils.is_list(fn.getline("."), filetype_lists)
   local cur_line = fn.getline(".")
-  local to_press = before
   if current_line_is_list
     and fn.getpos(".")[3] - 1 == string.len(cur_line) -- cursor on last char of line
   then
-    fn.feedkeys(vim.api.nvim_replace_termcodes(after, true, true, true))
-    run_recalculate_after_delay()
+    if config.content_indent then
+      local linenum = fn.line(".")
+      local cur_indent = utils.get_indent_lvl(cur_line)
+      local content = cur_line:gsub("^%s*", "", 1)
+      if after == "<c-t>" then
+        -- Tab: indent to parent's content column
+        local _, parent = utils.find_indent_parent_for_tab(linenum, filetype_lists)
+        if parent then
+          local parent_indent = utils.get_indent_lvl(parent)
+          local parent_cw = utils.get_content_width(parent, filetype_lists) or config.tabstop
+          local target = parent_indent + parent_cw
+          fn.setline(linenum, string.rep(" ", target) .. content)
+        else
+          fn.feedkeys(vim.api.nvim_replace_termcodes(after, true, true, true))
+        end
+      else
+        -- Shift-Tab: dedent to parent's indent level
+        local _, parent = utils.find_parent_line(linenum, filetype_lists)
+        if parent then
+          local target = utils.get_indent_lvl(parent)
+          fn.setline(linenum, string.rep(" ", target) .. content)
+        else
+          -- already at top level or no parent, dedent to column 0
+          fn.setline(linenum, content)
+        end
+      end
+      utils.reset_cursor_column(fn.col("$"))
+      run_recalculate_after_delay()
+    else
+      fn.feedkeys(vim.api.nvim_replace_termcodes(after, true, true, true))
+      run_recalculate_after_delay()
+    end
   else
     press(before, "i")
   end

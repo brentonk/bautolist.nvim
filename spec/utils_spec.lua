@@ -7,7 +7,7 @@ local utils = require("autolist.utils")
 -- Ensure config is initialized
 require("autolist.config").update()
 
-local list_types = { "[-+*]", "%d+[.)]", "%a[.)]", "%u*[.)]" }
+local list_types = { "[-+*]", "%d+[.)]", "%a[.)]", "%u+[.)]" }
 
 describe("utils", function()
   describe("is_blank_line", function()
@@ -103,6 +103,25 @@ describe("utils", function()
       assert.is_falsy(utils.is_list("   ", list_types))
     end)
 
+    it("rejects Quarto fragment separator (. . .)", function()
+      assert.is_falsy(utils.is_list(". . .", list_types))
+    end)
+
+    it("rejects bold/italic markup starting with *", function()
+      assert.is_falsy(utils.is_list("**Mini-heading.**", list_types))
+      assert.is_falsy(utils.is_list("*italic text*", list_types))
+    end)
+
+    it("rejects marker not followed by whitespace", function()
+      assert.is_falsy(utils.is_list("-not a list", list_types))
+      assert.is_falsy(utils.is_list("1.not a list", list_types))
+    end)
+
+    it("accepts bare marker at end of line", function()
+      assert.is_truthy(utils.is_list("-", list_types))
+      assert.is_truthy(utils.is_list("1.", list_types))
+    end)
+
     it("returns the pattern and match on success", function()
       local is, pat, match = utils.is_list("- item", list_types)
       assert.is_truthy(is)
@@ -186,6 +205,44 @@ describe("utils", function()
     end)
   end)
 
+  describe("get_content_width", function()
+    it("returns 2 for '- '", function()
+      assert.are.equal(2, utils.get_content_width("- item", list_types))
+    end)
+
+    it("returns 2 for '* '", function()
+      assert.are.equal(2, utils.get_content_width("* item", list_types))
+    end)
+
+    it("returns 3 for '1. '", function()
+      assert.are.equal(3, utils.get_content_width("1. item", list_types))
+    end)
+
+    it("returns 4 for '10. '", function()
+      assert.are.equal(4, utils.get_content_width("10. item", list_types))
+    end)
+
+    it("returns 3 for 'a) '", function()
+      assert.are.equal(3, utils.get_content_width("a) item", list_types))
+    end)
+
+    it("returns 3 for 'I. '", function()
+      assert.are.equal(3, utils.get_content_width("I. item", list_types))
+    end)
+
+    it("returns 5 for 'III. '", function()
+      assert.are.equal(5, utils.get_content_width("III. item", list_types))
+    end)
+
+    it("returns nil for non-list lines", function()
+      assert.is_nil(utils.get_content_width("just text", list_types))
+    end)
+
+    it("handles indented lines", function()
+      assert.are.equal(3, utils.get_content_width("   1. item", list_types))
+    end)
+  end)
+
   describe("is_ordered", function()
     it("returns truthy for ordered lists", function()
       assert.is_truthy(utils.is_ordered("1. item"))
@@ -200,6 +257,10 @@ describe("utils", function()
 
     it("returns nil for non-list lines", function()
       assert.is_nil(utils.is_ordered("just text"))
+    end)
+
+    it("returns nil for Quarto fragment separator", function()
+      assert.is_nil(utils.is_ordered(". . ."))
     end)
   end)
 end)

@@ -36,6 +36,10 @@ describe("config", function()
       assert.is_false(config.loose_lists)
     end)
 
+    it("has content_indent enabled by default", function()
+      assert.is_true(config.content_indent)
+    end)
+
     it("sets list_cap", function()
       assert.are.equal(50, config.list_cap)
     end)
@@ -64,6 +68,11 @@ describe("config", function()
     it("can enable loose_lists", function()
       config.update({ loose_lists = true })
       assert.is_true(config.loose_lists)
+    end)
+
+    it("can enable content_indent", function()
+      config.update({ content_indent = true })
+      assert.is_true(config.content_indent)
     end)
 
     it("adds custom filetypes to lists", function()
