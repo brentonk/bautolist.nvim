@@ -306,6 +306,7 @@ function M.get_content_width(line, list_types)
 end
 
 -- Walk upward to find nearest list item with strictly less indentation.
+-- Skips past siblings (same indent) and deeper children (greater indent).
 -- Returns (linenum, line) or nil.
 function M.find_parent_line(linenum, list_types)
 	local cur_indent = M.get_indent_lvl(fn.getline(linenum))
@@ -314,8 +315,12 @@ function M.find_parent_line(linenum, list_types)
 		local line = fn.getline(ln)
 		if M.is_blank_line(line) then
 			ln = ln - 1
-		elseif M.is_list(line, list_types) and M.get_indent_lvl(line) < cur_indent then
-			return ln, line
+		elseif M.is_list(line, list_types) then
+			if M.get_indent_lvl(line) < cur_indent then
+				return ln, line
+			else
+				ln = ln - 1
+			end
 		else
 			return nil
 		end

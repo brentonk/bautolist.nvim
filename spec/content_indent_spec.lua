@@ -106,3 +106,108 @@ describe("recalculate (content_indent)", function()
     assert.are.equal("3. third",  result[3])
   end)
 end)
+
+describe("find_parent_line (content_indent)", function()
+  local utils = require("autolist.utils")
+  local list_types = { "[-+*]", "%d+[.)]", "%a[.)]", "%u+[.)]" }
+
+  local function setup_buf(lines)
+    local buf = vim.api.nvim_create_buf(false, true)
+    vim.api.nvim_set_current_buf(buf)
+    vim.bo.filetype = "markdown"
+    vim.opt.expandtab = true
+    vim.opt.tabstop = 3
+    config.update({ content_indent = true })
+    vim.api.nvim_buf_set_lines(buf, 0, -1, false, lines)
+  end
+
+  after_each(function()
+    config.update({ content_indent = false })
+  end)
+
+  it("walks past siblings to find parent", function()
+    setup_buf({
+      "1. parent",
+      "   a) child a",
+      "      - grandchild 1",
+      "      - grandchild 2",
+    })
+
+    local ln, line = utils.find_parent_line(4, list_types)
+    assert.are.equal(2, ln)
+    assert.are.equal("   a) child a", line)
+  end)
+
+  it("returns nil when no parent exists above top-level siblings", function()
+    setup_buf({
+      "1. first",
+      "2. second",
+      "3. third",
+    })
+
+    local ln = utils.find_parent_line(3, list_types)
+    assert.is_nil(ln)
+  end)
+end)
+
+describe("shift-tab dedent (content_indent)", function()
+  after_each(function()
+    config.update({ content_indent = false })
+  end)
+
+  -- Simulates shift-tab by manually dedenting + recalculating synchronously
+  -- (the real shift_tab() uses an async timer for recalculate).
+  local function simulate_shift_tab(lines, cursor_line)
+    local utils = require("autolist.utils")
+    local list_types = { "[-+*]", "%d+[.)]", "%a[.)]", "%u+[.)]" }
+
+    local buf = vim.api.nvim_create_buf(false, true)
+    vim.api.nvim_set_current_buf(buf)
+    vim.bo.filetype = "markdown"
+    vim.opt.expandtab = true
+    vim.opt.tabstop = 3
+    config.update({ content_indent = true })
+
+    vim.api.nvim_buf_set_lines(buf, 0, -1, false, lines)
+    vim.api.nvim_win_set_cursor(0, { cursor_line, 0 })
+
+    -- Reproduce the shift-tab logic from handle_indent()
+    local cur_line = vim.fn.getline(".")
+    local content = cur_line:gsub("^%s*", "", 1)
+    local _, parent = utils.find_parent_line(cursor_line, list_types)
+    if parent then
+      local target = utils.get_indent_lvl(parent)
+      vim.fn.setline(cursor_line, string.rep(" ", target) .. content)
+    else
+      vim.fn.setline(cursor_line, content)
+    end
+
+    auto.recalculate()
+
+    return vim.api.nvim_buf_get_lines(buf, 0, -1, false)
+  end
+
+  it("dedents nested bullet to sibling of parent lettered list", function()
+    local result = simulate_shift_tab({
+      "1. Calculate residual variance",
+      "   - Number of observations note",
+      "2. Calculate the critical value",
+      "3. For each substantive parameter:",
+      "   a) Increment slightly upward",
+      "      - May want to use standard errors",
+      "      - cursor is here",
+    }, 7)
+
+    assert.are.equal("   b) cursor is here", result[7])
+  end)
+
+  it("dedents to top level when already at first child level", function()
+    local result = simulate_shift_tab({
+      "1. parent",
+      "   a) child",
+      "   b) another child",
+    }, 3)
+
+    assert.are.equal("2. another child", result[3])
+  end)
+end)
