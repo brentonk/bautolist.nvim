@@ -226,6 +226,7 @@ bautolist.nvim is a maintained fork of [gaoDean/autolist.nvim](https://github.co
 -   **Loose list support** (`loose_lists`, default `false`): When enabled, single blank lines between list items are treated as part of the same list (CommonMark "loose lists"). Two consecutive blank lines terminate a list. Upstream has no loose list handling.
 -   **Cursor fix on empty bullets**: `set_line_marker()` always preserves a space after the marker, fixing cursor placement after Shift-Tab on empty bullets (cursor was landing on the dot instead of after the space).
 -   **Stricter list marker detection**: List markers must be followed by whitespace (or be at end-of-line). Prevents Quarto fragment separators (`. . .`) from triggering roman numeral lists and bold/italic markup (`**text**`) from triggering unordered lists.
+-   **Empty bullet deletion fix**: Pressing Enter on an empty list bullet reliably removes it even when Neovim strips the trailing space from the marker, and the line is fully deleted rather than cleared to an empty string.
 
 # Other
 

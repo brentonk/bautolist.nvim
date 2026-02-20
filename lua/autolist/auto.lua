@@ -135,8 +135,11 @@ local function get_bullet_from(line, pattern)
     .. "%s+"
     .. "%[.%]"
     .. "%s*") -- bullet and checkbox
+  local matched_eol = line:match("^%s*"
+    .. pattern
+    .. "%s*$") -- bare marker at end of line (no content after)
 
-  return matched_with_checkbox or matched_bare
+  return matched_with_checkbox or matched_bare or matched_eol
 end
 
 local function is_in_code_fence()
@@ -154,7 +157,8 @@ local function find_suitable_bullet(line, filetype_lists, del_above)
     if bullet then
       if string.len(line) == string.len(bullet) then
         -- empty bullet, delete it
-        fn.setline(fn.line(".") - (del_above and 1 or -1), "")
+        local del_linenum = fn.line(".") - (del_above and 1 or -1)
+        vim.api.nvim_buf_set_lines(0, del_linenum - 1, del_linenum, false, {})
         utils.reset_cursor_column()
         return nil
       end
@@ -183,13 +187,26 @@ function M.new_bullet(prev_line_override)
     local farther_num = prev_line_num - 1
     if farther_num >= 1 then
       local farther_line = fn.getline(farther_num)
-      for _, pat in ipairs(filetype_lists) do
-        local b = get_bullet_from(farther_line, pat)
-        if b then
-          -- check it's not an empty bullet
-          if string.len(farther_line) > string.len(b) then
-            bullet = b
-            break
+      -- Only use this fallback when the list above is actually
+      -- loose-formatted (blank line between two list items).  A tight
+      -- list followed by a single blank is a terminated list.
+      local is_actually_loose = false
+      if farther_num >= 3 then
+        local above = fn.getline(farther_num - 1)
+        if utils.is_blank_line(above)
+          and utils.is_list(fn.getline(farther_num - 2), filetype_lists) then
+          is_actually_loose = true
+        end
+      end
+      if is_actually_loose then
+        for _, pat in ipairs(filetype_lists) do
+          local b = get_bullet_from(farther_line, pat)
+          if b then
+            -- check it's not an empty bullet
+            if string.len(farther_line) > string.len(b) then
+              bullet = b
+              break
+            end
           end
         end
       end
