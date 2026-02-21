@@ -49,6 +49,7 @@ This is using lazy.nvim, but you can adapt it to other package managers as well:
         vim.keymap.set("i", "<s-tab>", "<cmd>AutolistShiftTab<cr>")
         -- vim.keymap.set("i", "<c-t>", "<c-t><cmd>AutolistRecalculate<cr>") -- an example of using <c-t> to indent
         vim.keymap.set("i", "<CR>", "<CR><cmd>AutolistNewBullet<cr>")
+        vim.keymap.set("i", "<S-CR>", "<CR><cmd>AutolistSoftReturn<cr>")
         vim.keymap.set("n", "o", "o<cmd>AutolistNewBullet<cr>")
         vim.keymap.set("n", "O", "O<cmd>AutolistNewBulletBefore<cr>")
         vim.keymap.set("n", "<CR>", "<cmd>AutolistToggleCheckbox<cr><CR>")
@@ -186,6 +187,7 @@ Here are all the public functions:
 -   `AutolistCyclePrev` : above, but backwards
 -   `AutolistTab` : has a special use case where you want to indent the list when you press tab. If you want to indent the list when you press `<c-t>`, you only need to map `<c-t>` to `AutolistRecalculate` because `AutolistTab` basically turns a tab into `<c-t>` with recalculate.
 -   `AutolistShiftTab` : same thing as above, used to replicate word processors. Mapping `<s-tab>` to this will convert it into `<c-d>AutolistRecalculate`.
+-   `AutolistSoftReturn` : creates a continuation line (no bullet) indented to align with the list item's content column. Useful for wrapping long list items across multiple lines. Recommended mapping: `<S-CR>`.
 
 All of the functions described above have lua counterparts which are just snake case versions of the pascal case commands. For example `AutolistNewBullet` has the snake case counterpart `require("autolist").new_bullet()`
 
@@ -227,6 +229,7 @@ bautolist.nvim is a maintained fork of [gaoDean/autolist.nvim](https://github.co
 -   **Cursor fix on empty bullets**: `set_line_marker()` always preserves a space after the marker, fixing cursor placement after Shift-Tab on empty bullets (cursor was landing on the dot instead of after the space).
 -   **Stricter list marker detection**: List markers must be followed by whitespace (or be at end-of-line). Prevents Quarto fragment separators (`. . .`) from triggering roman numeral lists and bold/italic markup (`**text**`) from triggering unordered lists.
 -   **Empty bullet deletion fix**: Pressing Enter on an empty list bullet reliably removes it even when Neovim strips the trailing space from the marker, and the line is fully deleted rather than cleared to an empty string.
+-   **Soft return** (`AutolistSoftReturn`): Creates a continuation line (no bullet) indented to align with the list item's content column, useful for multi-line list items. Upstream has no equivalent.
 
 # Other
 

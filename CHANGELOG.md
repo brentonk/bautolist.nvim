@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+### Added
+
+- `soft_return` command (`AutolistSoftReturn`) for creating continuation lines aligned to list content column. Bind to `<S-CR>` for a soft return that adds a new line indented to the content column without a bullet.
+
 ## [v4.2.1] - 2026-02-20
 
 ### Fixed

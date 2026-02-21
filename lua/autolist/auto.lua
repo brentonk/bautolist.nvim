@@ -256,6 +256,28 @@ function M.new_bullet(prev_line_override)
   end
 end
 
+function M.soft_return()
+  local filetype_lists = get_lists()
+  if not filetype_lists then return nil end
+  if is_in_code_fence() then return nil end
+
+  local prev_line = fn.getline(fn.line(".") - 1)
+  local cur_line = fn.getline(".")
+
+  if not utils.is_list(prev_line, filetype_lists) then return nil end
+
+  local prev_indent = utils.get_indent_lvl(prev_line)
+  local content_width
+  if config.content_indent then
+    content_width = utils.get_content_width(prev_line, filetype_lists) or config.tabstop
+  else
+    content_width = config.tabstop
+  end
+  local target = prev_indent + content_width
+  utils.set_current_line(string.rep(" ", target) .. cur_line:gsub("^%s*", "", 1))
+  utils.reset_cursor_column(fn.col("$"))
+end
+
 -- othewise it runs too fast and feedkeys doesn't register commands
 local function run_recalculate_after_delay()
   vim.loop.new_timer():start(0, 0, vim.schedule_wrap(function()
