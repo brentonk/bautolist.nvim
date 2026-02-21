@@ -84,6 +84,8 @@ Workflow:
 
 When making changes, always branch from and push to `develop` unless explicitly told otherwise. Never push untested work directly to `main`.
 
+After any release (merge `develop` into `main` and tag), ensure `develop` is identical to `main` by merging `main` back into `develop` (or resetting `develop` to `main`). This prevents `develop` from diverging from the release state.
+
 Before committing, ensure **CHANGELOG.md** and **README.md** are up to date:
 - Add new entries under `## [Unreleased]` in CHANGELOG.md for any added, changed, or fixed items.
 - If a commit adds or changes a user-facing config option, update the config block in README.md to match.
