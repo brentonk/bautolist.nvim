@@ -11,6 +11,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 - `soft_return` command (`AutolistSoftReturn`) for creating continuation lines aligned to list content column. Bind to `<S-CR>` for a soft return that adds a new line indented to the content column without a bullet.
 
+### Fixed
+
+- With `loose_lists` enabled, deleting a list item (e.g., `dd` in normal mode) no longer strips the bullet from the next item. The bug was caused by `get_list_start()` returning a blank line as the "list start," which made `recalculate()` replace the marker with an empty string.
+
 ## [v4.2.1] - 2026-02-20
 
 ### Fixed

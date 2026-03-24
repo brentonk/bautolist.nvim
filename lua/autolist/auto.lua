@@ -51,6 +51,8 @@ function M.recalculate(override_start_num)
     list_start_num = utils.get_list_start(fn.line("."), types)
   end
   if not list_start_num then return end -- returns nil if not ordered list
+  local list_start_line = fn.getline(list_start_num)
+  if not utils.is_list(list_start_line, types) then return end
   if reset_list then
     local next_num = list_start_num + reset_list
     local nxt = fn.getline(next_num)

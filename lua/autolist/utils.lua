@@ -177,8 +177,15 @@ function M.get_list_start(cur_linenum, list_types)
 	local linenum = cur_linenum
 	local line = fn.getline(linenum)
 	-- if cursor is on a blank line in loose mode, look down to find a list item
+	-- then fall through to the normal upward walk to locate the true list start
 	if config.loose_lists and M.is_blank_line(line) then
-		return linenum
+		local next_line = fn.getline(linenum + 1)
+		if M.is_list(next_line, list_types) then
+			linenum = linenum + 1
+			line = next_line
+		else
+			return nil
+		end
 	end
 	if M.is_list(line, list_types) then
 		while M.is_list(line, list_types) do

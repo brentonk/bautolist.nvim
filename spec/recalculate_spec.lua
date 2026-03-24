@@ -225,6 +225,32 @@ describe("recalculate (loose lists)", function()
     assert.are.equal("2. second parent",     result[5])
   end)
 
+  it("does not strip bullets when cursor is on blank line before a list", function()
+    -- Simulates: user had "- hello\n\n- there", deleted "- hello" with dd,
+    -- leaving cursor on the blank line above "- there".
+    local result = recalc_buf_loose({
+      "",
+      "- there",
+    }, 1)
+
+    assert.are.equal("",         result[1])
+    assert.are.equal("- there",  result[2])
+  end)
+
+  it("does not strip bullets when cursor is on blank line before unordered loose list", function()
+    local result = recalc_buf_loose({
+      "",
+      "- first",
+      "",
+      "- second",
+    }, 1)
+
+    assert.are.equal("",          result[1])
+    assert.are.equal("- first",   result[2])
+    assert.are.equal("",          result[3])
+    assert.are.equal("- second",  result[4])
+  end)
+
   it("does not affect tight lists when loose_lists is false", function()
     -- This uses the standard recalc_buf which has loose_lists = false
     local result = recalc_buf({
