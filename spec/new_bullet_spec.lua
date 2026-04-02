@@ -199,3 +199,127 @@ describe("new_bullet (loose list, loose_lists enabled)", function()
     end
   end)
 end)
+
+-- ──────────────────────────────────────────────────────────────────────────
+describe("new_bullet after continuation line (soft_return)", function()
+  local function make_ci_buf(lines, cursor_line, opts)
+    local buf = vim.api.nvim_create_buf(false, true)
+    vim.api.nvim_set_current_buf(buf)
+    vim.bo.filetype = "markdown"
+    vim.opt.expandtab = true
+    vim.opt.tabstop = 4
+    local ci = true
+    if opts and opts.content_indent ~= nil then ci = opts.content_indent end
+    config.update({
+      loose_lists = (opts and opts.loose) or false,
+      content_indent = ci,
+    })
+    vim.api.nvim_buf_set_lines(buf, 0, -1, false, lines)
+    vim.api.nvim_win_set_cursor(0, { cursor_line or #lines, 0 })
+    return buf
+  end
+
+  after_each(function()
+    config.update({ content_indent = false })
+  end)
+
+  it("creates a new bullet after a continuation line (unordered)", function()
+    local buf = make_ci_buf({
+      "- Hello",
+      "  there",
+    }, 2)
+
+    simulate_enter(buf)
+    local r = get_lines(buf)
+    assert.are.equal("- Hello", r[1])
+    assert.are.equal("  there", r[2])
+    assert.are.equal("- ",      r[3])
+  end)
+
+  it("creates a new bullet after a continuation line (ordered)", function()
+    local buf = make_ci_buf({
+      "1. Hello",
+      "   there",
+    }, 2)
+
+    simulate_enter(buf)
+    local r = get_lines(buf)
+    assert.are.equal("1. Hello", r[1])
+    assert.are.equal("   there", r[2])
+    assert.are.equal("2. ",      r[3])
+  end)
+
+  it("creates a new bullet after multiple continuation lines", function()
+    local buf = make_ci_buf({
+      "- Hello",
+      "  there",
+      "  world",
+    }, 3)
+
+    simulate_enter(buf)
+    local r = get_lines(buf)
+    assert.are.equal("- Hello", r[1])
+    assert.are.equal("  there", r[2])
+    assert.are.equal("  world", r[3])
+    assert.are.equal("- ",      r[4])
+  end)
+
+  it("creates a sibling after continuation in a multi-item list", function()
+    local buf = make_ci_buf({
+      "- First",
+      "- Hello",
+      "  there",
+    }, 3)
+
+    simulate_enter(buf)
+    local r = get_lines(buf)
+    assert.are.equal("- First", r[1])
+    assert.are.equal("- Hello", r[2])
+    assert.are.equal("  there", r[3])
+    assert.are.equal("- ",      r[4])
+  end)
+
+  it("works with content_indent disabled (tabstop-based indent)", function()
+    local buf = make_ci_buf({
+      "- Hello",
+      "    there",
+    }, 2, { content_indent = false })
+
+    simulate_enter(buf)
+    local r = get_lines(buf)
+    assert.are.equal("- Hello",   r[1])
+    assert.are.equal("    there", r[2])
+    assert.are.equal("- ",        r[3])
+  end)
+
+  it("creates a new bullet after continuation in a loose list", function()
+    local buf = make_ci_buf({
+      "- First",
+      "",
+      "- Hello",
+      "  there",
+    }, 4, { loose = true })
+
+    simulate_enter(buf)
+    local r = get_lines(buf)
+    assert.are.equal("- First", r[1])
+    assert.are.equal("",        r[2])
+    assert.are.equal("- Hello", r[3])
+    assert.are.equal("  there", r[4])
+    assert.are.equal("",        r[5])
+    assert.are.equal("- ",      r[6])
+  end)
+
+  it("creates a new bullet after continuation in a tight list with loose_lists enabled", function()
+    local buf = make_ci_buf({
+      "- Hello",
+      "  there",
+    }, 2, { loose = true })
+
+    simulate_enter(buf)
+    local r = get_lines(buf)
+    assert.are.equal("- Hello", r[1])
+    assert.are.equal("  there", r[2])
+    assert.are.equal("- ",      r[3])
+  end)
+end)

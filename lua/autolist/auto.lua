@@ -183,6 +183,37 @@ function M.new_bullet(prev_line_override)
     filetype_lists,
     not prev_line_override)
 
+  -- If prev_line is a continuation line (not a list item, not blank),
+  -- walk upward to find the parent list item and create a sibling bullet.
+  -- Track the parent's line number for loose list detection below.
+  local continuation_parent_num = nil
+  if not bullet and not prev_line_override
+    and not utils.is_blank_line(prev_line)
+    and not utils.is_list(prev_line, filetype_lists) then
+    local search_num = prev_line_num - 1
+    while search_num >= 1 do
+      local search_line = fn.getline(search_num)
+      if utils.is_blank_line(search_line) then break end
+      if utils.is_list(search_line, filetype_lists) then
+        -- Verify the continuation line's indent matches the list item's content column
+        local prev_indent = utils.get_indent_lvl(prev_line)
+        local list_indent = utils.get_indent_lvl(search_line)
+        local content_width
+        if config.content_indent then
+          content_width = utils.get_content_width(search_line, filetype_lists) or config.tabstop
+        else
+          content_width = config.tabstop
+        end
+        if prev_indent == list_indent + content_width then
+          bullet = find_suitable_bullet(search_line, filetype_lists, false)
+          continuation_parent_num = search_num
+        end
+        break
+      end
+      search_num = search_num - 1
+    end
+  end
+
   -- in loose mode, if prev_line is blank, look one more line back
   if not bullet and config.loose_lists and utils.is_blank_line(prev_line)
     and not prev_line_override then
@@ -233,7 +264,9 @@ function M.new_bullet(prev_line_override)
   if bullet then -- insert bullet
     -- in loose mode, detect if the list uses loose spacing and insert a blank line
     if config.loose_lists and not prev_line_override then
-      local check_num = prev_line_num
+      -- When coming from a continuation line, check looseness from the
+      -- parent list item rather than the continuation line itself.
+      local check_num = continuation_parent_num or prev_line_num
       -- if we already looked past a blank line, the list is loose
       local is_loose = utils.is_blank_line(fn.getline(prev_line_num))
       if not is_loose and check_num >= 2 then

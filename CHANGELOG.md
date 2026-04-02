@@ -13,6 +13,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ### Fixed
 
+- `new_bullet` now creates a sibling bullet when pressing Enter on a continuation line (created by `soft_return`/`<S-CR>`). Previously, pressing Enter on a continuation line produced another continuation line instead of a new list item.
 - With `loose_lists` enabled, deleting a list item (e.g., `dd` in normal mode) no longer strips the bullet from the next item. The bug was caused by `get_list_start()` returning a blank line as the "list start," which made `recalculate()` replace the marker with an empty string.
 
 ## [v4.2.1] - 2026-02-20
