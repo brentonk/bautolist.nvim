@@ -104,9 +104,9 @@ function M.recalculate(override_start_num)
         prev_indent = -1 -- escaped the child list
       elseif
         line_indent ~= prev_indent -- small difference between var names
-        and line_indent == list_indent + (config.content_indent
-          and (utils.get_content_width(list_start, types) or config.tabstop)
-          or config.tabstop)
+        and line_indent == list_indent + (config.content_indent_enabled()
+          and (utils.get_content_width(list_start, types) or config.indent_width())
+          or config.indent_width())
       then
         -- this part recalculates a child list with recursion
         -- the prev_indent prevents it from recalculating multiple times.
@@ -199,10 +199,10 @@ function M.new_bullet(prev_line_override)
         local prev_indent = utils.get_indent_lvl(prev_line)
         local list_indent = utils.get_indent_lvl(search_line)
         local content_width
-        if config.content_indent then
-          content_width = utils.get_content_width(search_line, filetype_lists) or config.tabstop
+        if config.content_indent_enabled() then
+          content_width = utils.get_content_width(search_line, filetype_lists) or config.indent_width()
         else
-          content_width = config.tabstop
+          content_width = config.indent_width()
         end
         if prev_indent == list_indent + content_width then
           bullet = find_suitable_bullet(search_line, filetype_lists, false)
@@ -252,11 +252,11 @@ function M.new_bullet(prev_line_override)
     and (config.colon.indent_raw
     or (bullet and config.colon.indent)) then
     local indent_str
-    if config.content_indent then
+    if config.content_indent_enabled() then
       local cw = utils.get_content_width(prev_line, filetype_lists)
-      indent_str = string.rep(" ", (cw or config.tabstop) + utils.get_indent_lvl(prev_line))
+      indent_str = string.rep(" ", (cw or config.indent_width()) + utils.get_indent_lvl(prev_line))
     else
-      indent_str = config.tab .. prev_line:match("^%s*")
+      indent_str = config.indent_string() .. prev_line:match("^%s*")
     end
     bullet = indent_str .. config.colon.preferred .. " "
   end
@@ -303,10 +303,10 @@ function M.soft_return()
 
   local prev_indent = utils.get_indent_lvl(prev_line)
   local content_width
-  if config.content_indent then
-    content_width = utils.get_content_width(prev_line, filetype_lists) or config.tabstop
+  if config.content_indent_enabled() then
+    content_width = utils.get_content_width(prev_line, filetype_lists) or config.indent_width()
   else
-    content_width = config.tabstop
+    content_width = config.indent_width()
   end
   local target = prev_indent + content_width
   utils.set_current_line(string.rep(" ", target) .. cur_line:gsub("^%s*", "", 1))
@@ -327,7 +327,7 @@ local function handle_indent(before, after)
   if current_line_is_list
     and fn.getpos(".")[3] - 1 == string.len(cur_line) -- cursor on last char of line
   then
-    if config.content_indent then
+    if config.content_indent_enabled() then
       local linenum = fn.line(".")
       local cur_indent = utils.get_indent_lvl(cur_line)
       local content = cur_line:gsub("^%s*", "", 1)
@@ -336,7 +336,7 @@ local function handle_indent(before, after)
         local _, parent = utils.find_indent_parent_for_tab(linenum, filetype_lists)
         if parent then
           local parent_indent = utils.get_indent_lvl(parent)
-          local parent_cw = utils.get_content_width(parent, filetype_lists) or config.tabstop
+          local parent_cw = utils.get_content_width(parent, filetype_lists) or config.indent_width()
           local target = parent_indent + parent_cw
           fn.setline(linenum, string.rep(" ", target) .. content)
         else

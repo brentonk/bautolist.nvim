@@ -10,6 +10,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 ### Added
 
 - `soft_return` command (`AutolistSoftReturn`) for creating continuation lines aligned to list content column. Bind to `<S-CR>` for a soft return that adds a new line indented to the content column without a bullet.
+- Per-buffer `content_indent` override: set `vim.b.autolist_content_indent` to enable/disable content-aligned indentation in a single buffer (e.g. `false` in an Obsidian vault ftplugin to get plain `tabstop`-width indents there while keeping content alignment elsewhere).
+
+### Changed
+
+- Indent width is now resolved from buffer-local `tabstop`/`expandtab` at call time (`config.indent_width()`/`config.indent_string()`) instead of a global snapshot taken at `setup()`. Buffers with ftplugin-local indent settings now indent lists accordingly. `config.tabstop`/`config.tab` are still populated by `config.update()` for backward compatibility but are no longer used internally.
 
 ### Fixed
 

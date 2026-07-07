@@ -85,4 +85,58 @@ describe("config", function()
       assert.are.equal("[-+*]", config.lists.org[1])
     end)
   end)
+
+  describe("buffer-aware accessors", function()
+    local saved_tabstop, saved_expandtab
+
+    before_each(function()
+      config.update()
+      saved_tabstop = vim.bo.tabstop
+      saved_expandtab = vim.bo.expandtab
+    end)
+
+    after_each(function()
+      vim.bo.tabstop = saved_tabstop
+      vim.bo.expandtab = saved_expandtab
+      vim.b.autolist_content_indent = nil
+    end)
+
+    it("indent_width follows buffer-local tabstop with expandtab", function()
+      vim.bo.expandtab = true
+      vim.bo.tabstop = 4
+      assert.are.equal(4, config.indent_width())
+      vim.bo.tabstop = 2
+      assert.are.equal(2, config.indent_width())
+    end)
+
+    it("indent_width is 1 without expandtab", function()
+      vim.bo.expandtab = false
+      assert.are.equal(1, config.indent_width())
+    end)
+
+    it("indent_string matches the buffer indent settings", function()
+      vim.bo.expandtab = true
+      vim.bo.tabstop = 3
+      assert.are.equal("   ", config.indent_string())
+      vim.bo.expandtab = false
+      assert.are.equal("\t", config.indent_string())
+    end)
+
+    it("content_indent_enabled follows the global setting", function()
+      config.update({ content_indent = true })
+      assert.is_true(config.content_indent_enabled())
+      config.update({ content_indent = false })
+      assert.is_false(config.content_indent_enabled())
+    end)
+
+    it("b:autolist_content_indent overrides the global setting", function()
+      config.update({ content_indent = true })
+      vim.b.autolist_content_indent = false
+      assert.is_false(config.content_indent_enabled())
+
+      config.update({ content_indent = false })
+      vim.b.autolist_content_indent = true
+      assert.is_true(config.content_indent_enabled())
+    end)
+  end)
 end)

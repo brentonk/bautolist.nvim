@@ -94,4 +94,33 @@ M.update = function(opts)
 	M.recal_full = false
 end
 
+-- Indent width resolved from buffer-local options at call time, so
+-- per-buffer overrides (e.g. from an ftplugin) are honored. Mirrors the
+-- M.tabstop semantics: tabstop-many spaces with expandtab, width 1 for a
+-- real tab without it.
+M.indent_width = function()
+	if vim.bo.expandtab then
+		return vim.bo.tabstop
+	end
+	return 1
+end
+
+-- The whitespace string for one level of indent in the current buffer.
+M.indent_string = function()
+	if vim.bo.expandtab then
+		return string.rep(" ", vim.bo.tabstop)
+	end
+	return "\t"
+end
+
+-- content_indent with an optional per-buffer override: set
+-- b:autolist_content_indent to override the global setting in one buffer.
+M.content_indent_enabled = function()
+	local override = vim.b.autolist_content_indent
+	if override ~= nil then
+		return override
+	end
+	return M.content_indent
+end
+
 return M
